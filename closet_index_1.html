@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Closet — Guarda-Roupa Virtual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F2EFE9;
+  --white:#FFFFFF;
+  --text:#1A1814;
+  --text-mid:#6B6660;
+  --text-light:#9B9890;
+  --rust:#B85C38;
+  --rust-dark:#9A4A2C;
+  --rust-bg:#FAECE7;
+  --border:#E2DDD6;
+  --card-radius:14px;
+  --tag-radius:20px;
+}
+html,body{min-height:100%;background:var(--cream);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.6}
+
+/* ── HEADER ── */
+header{
+  background:var(--cream);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 3rem;height:68px;
+  position:sticky;top:0;z-index:100;
+}
+.logo{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--text);letter-spacing:-0.3px}
+nav{display:flex;gap:2rem;align-items:center}
+nav a{font-size:14px;font-weight:400;color:var(--text-mid);text-decoration:none;cursor:pointer;padding-bottom:2px;transition:color 0.15s}
+nav a:hover{color:var(--text)}
+nav a.active{color:var(--rust);border-bottom:2px solid var(--rust);font-weight:500}
+
+/* ── PAGES ── */
+.page{display:none;padding:3rem}
+.page.active{display:block}
+
+/* ── PAGE HEADER ── */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2.5rem}
+.page-header h1{font-family:'Playfair Display',serif;font-size:42px;font-weight:400;line-height:1.1;margin-bottom:6px}
+.page-header p{font-size:15px;color:var(--text-mid)}
+.btn-add{
+  display:flex;align-items:center;gap:8px;
+  background:var(--rust);color:white;
+  border:none;border-radius:var(--tag-radius);
+  padding:12px 24px;font-family:'Inter',sans-serif;
+  font-size:14px;font-weight:500;cursor:pointer;
+  transition:background 0.15s;white-space:nowrap;
+}
+.btn-add:hover{background:var(--rust-dark)}
+.btn-add i{font-size:18px}
+
+/* ── SEARCH BAR ── */
+.search-wrap{
+  background:var(--white);
+  border-radius:12px;
+  padding:0 1.5rem;
+  display:flex;align-items:center;gap:1rem;
+  margin-bottom:2rem;
+  box-shadow:0 1px 3px rgba(0,0,0,0.05);
+}
+.search-wrap input{
+  flex:1;padding:18px 0;border:none;outline:none;
+  font-family:'Inter',sans-serif;font-size:15px;
+  color:var(--text);background:transparent;
+}
+.search-wrap input::placeholder{color:var(--text-light)}
+.search-wrap i{font-size:20px;color:var(--text-light)}
+.search-divider{width:1px;height:28px;background:var(--border)}
+.cat-select{
+  border:none;outline:none;background:transparent;
+  font-family:'Inter',sans-serif;font-size:14px;
+  color:var(--text);cursor:pointer;padding:18px 0 18px 8px;
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6660' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 0 center;
+  padding-right:24px;
+}
+
+/* ── CLOTHES GRID ── */
+.clothes-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.5rem;
+}
+@media(min-width:1200px){.clothes-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:800px){.clothes-grid{grid-template-columns:repeat(2,1fr)}}
+
+.cloth-card{
+  background:var(--white);
+  border-radius:var(--card-radius);
+  overflow:hidden;
+  cursor:pointer;
+  transition:transform 0.2s,box-shadow 0.2s;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+}
+.cloth-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.1)}
+.cloth-card.selected{outline:3px solid var(--rust)}
+
+.cloth-photo{
+  width:100%;aspect-ratio:3/3.5;
+  object-fit:cover;
+  background:var(--cream);
+  display:flex;align-items:center;justify-content:center;
+  font-size:72px;
+  position:relative;overflow:hidden;
+}
+.cloth-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.cloth-photo .fallback{font-size:72px}
+
+.cloth-body{padding:14px 16px 16px}
+.cloth-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:400;margin-bottom:6px;line-height:1.3}
+.cloth-meta{display:flex;align-items:center;justify-content:space-between}
+.cloth-cat{font-size:13px;color:var(--text-mid)}
+.cloth-brand-tag{
+  font-size:11px;font-weight:500;letter-spacing:0.05em;
+  background:var(--cream);color:var(--text-mid);
+  padding:3px 10px;border-radius:var(--tag-radius);
+  text-transform:uppercase;
+}
+.cloth-check{
+  position:absolute;top:12px;right:12px;
+  width:26px;height:26px;border-radius:50%;
+  background:var(--rust);color:white;
+  display:none;align-items:center;justify-content:center;
+  font-size:13px;
+}
+.cloth-card.selected .cloth-check{display:flex}
+
+/* ── AI SIDEBAR (wardrobe) ── */
+.wardrobe-layout{display:grid;grid-template-columns:1fr 300px;gap:2rem;align-items:start}
+.ai-sidebar{
+  background:var(--white);
+  border-radius:var(--card-radius);
+  padding:1.5rem;
+  position:sticky;top:88px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+}
+.ai-sidebar h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;margin-bottom:4px}
+.ai-sidebar p{font-size:13px;color:var(--text-mid);margin-bottom:1.25rem}
+.ai-dot{width:8px;height:8px;border-radius:50%;background:#1D9E75;animation:pulse 2s infinite;display:inline-block;margin-right:6px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+.selected-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem;min-height:32px}
+.chip{
+  display:flex;align-items:center;gap:5px;
+  background:var(--cream);border:1px solid var(--border);
+  border-radius:var(--tag-radius);padding:4px 10px;
+  font-size:12px;color:var(--text);
+}
+.chip .emoji{font-size:15px}
+.btn-recommend{
+  width:100%;padding:11px;border:none;
+  border-radius:var(--tag-radius);
+  background:var(--rust);color:white;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:500;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  gap:6px;transition:background 0.15s;
+}
+.btn-recommend:hover{background:var(--rust-dark)}
+.btn-recommend:disabled{opacity:0.45;cursor:default}
+.ai-box{
+  background:var(--cream);border-radius:10px;
+  padding:12px 14px;font-size:13px;color:var(--text-mid);
+  line-height:1.7;margin-top:1rem;
+}
+.ai-tag{
+  display:inline-block;background:var(--rust-bg);color:var(--rust);
+  border-radius:var(--tag-radius);font-size:11px;
+  padding:3px 10px;margin:3px 3px 0 0;
+}
+hr.thin{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+
+/* ── LOOKS TAB ── */
+.looks-layout{display:grid;grid-template-columns:260px 1fr 280px;gap:1.5rem;align-items:start}
+@media(max-width:1100px){.looks-layout{grid-template-columns:220px 1fr 260px}}
+
+/* left panel — piece picker */
+.piece-picker{background:var(--white);border-radius:var(--card-radius);padding:1.25rem;box-shadow:0 1px 4px rgba(0,0,0,0.06);position:sticky;top:88px;max-height:calc(100vh - 120px);overflow-y:auto}
+.piece-picker h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:400;margin-bottom:10px}
+.picker-cats{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.pcat{padding:4px 11px;border:1px solid var(--border);border-radius:var(--tag-radius);background:transparent;font-family:'Inter',sans-serif;font-size:11px;cursor:pointer;color:var(--text-mid);transition:all .15s}
+.pcat:hover,.pcat.on{background:var(--text);color:var(--cream);border-color:var(--text)}
+.picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.picker-card{border-radius:10px;overflow:hidden;border:1.5px solid var(--border);cursor:pointer;transition:all .15s;background:var(--cream)}
+.picker-card:hover{border-color:var(--rust);transform:translateY(-1px)}
+.picker-card.in-look{border-color:var(--rust);box-shadow:0 0 0 2px rgba(184,92,56,.2)}
+.picker-photo{aspect-ratio:3/3.5;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;font-size:36px}
+.picker-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.picker-tick{position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:var(--rust);color:white;display:none;align-items:center;justify-content:center;font-size:11px}
+.picker-card.in-look .picker-tick{display:flex}
+.picker-label{padding:5px 7px;font-size:10px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-mid)}
+
+/* center — builder */
+.look-builder{background:var(--white);border-radius:var(--card-radius);padding:1.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.look-builder h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;margin-bottom:1.25rem}
+.builder-body{display:flex;gap:1.5rem;align-items:flex-start}
+.mannequin-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:1rem}
+.slots-col{flex:1;display:flex;flex-direction:column;gap:8px;padding-top:8px}
+.slot{
+  background:var(--cream);border:1.5px dashed var(--border);
+  border-radius:10px;padding:10px 12px;
+  display:flex;align-items:center;gap:10px;
+  cursor:pointer;transition:all .15s;min-height:58px;
+}
+.slot:hover{border-color:var(--rust);background:var(--rust-bg)}
+.slot.filled{border-style:solid;border-color:var(--rust);background:var(--rust-bg)}
+.slot-icon{font-size:20px;color:var(--text-light);flex-shrink:0}
+.slot.filled .slot-icon{color:var(--rust)}
+.slot-body{flex:1;min-width:0}
+.slot-label{font-size:10px;color:var(--text-light);text-transform:uppercase;letter-spacing:.05em}
+.slot-name{font-size:12px;font-weight:500;color:var(--text-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot.filled .slot-name{color:var(--rust)}
+.slot-img{width:36px;height:36px;border-radius:6px;object-fit:cover;border:1px solid var(--border);flex-shrink:0;display:none}
+.slot.filled .slot-img{display:block}
+.slot-remove{font-size:14px;color:var(--text-light);flex-shrink:0;display:none;background:transparent;border:none;cursor:pointer;padding:2px}
+.slot.filled .slot-remove{display:block}
+.slot-remove:hover{color:var(--rust)}
+
+/* right — AI sidebar */
+.look-sidebar{background:var(--white);border-radius:var(--card-radius);padding:1.5rem;position:sticky;top:88px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.look-sidebar h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:400;margin-bottom:1rem}
+.occ-label{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:8px}
+
+.saved-looks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1rem;margin-top:2rem}
+.saved-card{background:var(--white);border-radius:var(--card-radius);overflow:hidden;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.06);transition:transform .15s}
+.saved-card:hover{transform:translateY(-2px)}
+.saved-thumb{aspect-ratio:1;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:40px;gap:4px;flex-wrap:wrap;padding:8px}
+.saved-thumb img{width:40px;height:40px;object-fit:cover;border-radius:6px}
+.saved-info{padding:10px 12px}
+.saved-info p{font-size:13px;font-weight:500}
+.saved-info small{font-size:11px;color:var(--text-light)}
+
+/* ── SHOP TAB ── */
+.shop-top{display:flex;gap:1rem;align-items:center;margin-bottom:1.5rem}
+.shop-search-wrap{
+  flex:1;background:var(--white);border-radius:12px;
+  padding:0 1.25rem;display:flex;align-items:center;gap:10px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.05);
+}
+.shop-search-wrap input{
+  flex:1;padding:16px 0;border:none;outline:none;
+  font-family:'Inter',sans-serif;font-size:15px;color:var(--text);background:transparent;
+}
+.shop-search-wrap input::placeholder{color:var(--text-light)}
+.btn-shop-search{
+  padding:12px 28px;border:none;border-radius:var(--tag-radius);
+  background:var(--rust);color:white;font-family:'Inter',sans-serif;
+  font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.15s;
+}
+.btn-shop-search:hover{background:var(--rust-dark)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:2rem}
+.fchip{
+  padding:7px 18px;border:1px solid var(--border);
+  border-radius:var(--tag-radius);background:var(--white);
+  font-family:'Inter',sans-serif;font-size:13px;color:var(--text-mid);
+  cursor:pointer;transition:all 0.15s;
+}
+.fchip:hover,.fchip.on{background:var(--text);color:var(--cream);border-color:var(--text)}
+.ai-banner{
+  background:var(--white);border-radius:12px;
+  padding:14px 18px;margin-bottom:1.5rem;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.05);
+  display:none;
+}
+.ai-banner i{font-size:20px;color:var(--rust);flex-shrink:0}
+.ai-banner p{font-size:13px;color:var(--text-mid);line-height:1.6}
+.ai-banner strong{color:var(--text);font-weight:500}
+
+.shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+@media(min-width:1200px){.shop-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:800px){.shop-grid{grid-template-columns:repeat(2,1fr)}}
+
+.product-card{
+  background:var(--white);border-radius:var(--card-radius);
+  overflow:hidden;cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  transition:transform 0.2s,box-shadow 0.2s;
+}
+.product-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.1)}
+.product-photo{
+  aspect-ratio:3/3.5;background:var(--cream);
+  display:flex;align-items:center;justify-content:center;
+  font-size:72px;position:relative;overflow:hidden;
+}
+.product-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.store-pill{
+  position:absolute;top:10px;left:10px;
+  background:rgba(255,255,255,0.92);
+  border-radius:var(--tag-radius);padding:3px 10px;
+  font-size:11px;font-weight:500;letter-spacing:0.04em;
+  color:var(--text);text-transform:uppercase;
+  backdrop-filter:blur(4px);
+}
+.ai-pill{
+  position:absolute;top:10px;right:10px;
+  background:var(--rust);color:white;
+  border-radius:var(--tag-radius);padding:3px 8px;
+  font-size:10px;font-weight:500;
+  display:flex;align-items:center;gap:3px;
+}
+.product-body{padding:14px 16px 16px}
+.product-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:400;margin-bottom:4px;line-height:1.3}
+.product-brand{font-size:12px;color:var(--text-light);margin-bottom:10px}
+.product-row{display:flex;align-items:center;justify-content:space-between}
+.product-price{font-size:16px;font-weight:500;color:var(--text)}
+.product-old{font-size:12px;color:var(--text-light);text-decoration:line-through;margin-left:6px}
+.btn-save{
+  display:flex;align-items:center;gap:4px;
+  padding:6px 12px;border:1px solid var(--border);
+  border-radius:var(--tag-radius);background:transparent;
+  font-family:'Inter',sans-serif;font-size:12px;
+  cursor:pointer;color:var(--text-mid);transition:all 0.15s;
+}
+.btn-save:hover{background:var(--rust);color:white;border-color:var(--rust)}
+
+/* ── DASHBOARD ── */
+.dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:2.5rem}
+.stat-card{background:var(--white);border-radius:var(--card-radius);padding:1.5rem;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.stat-card .label{font-size:12px;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.stat-card .value{font-family:'Playfair Display',serif;font-size:36px;font-weight:400}
+.stat-card .sub{font-size:12px;color:var(--text-light);margin-top:4px}
+.recent-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;margin-bottom:1.25rem}
+.recent-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+@media(max-width:800px){.recent-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:5rem 2rem;color:var(--text-light)}
+.empty i{font-size:48px;display:block;margin-bottom:1rem;opacity:0.3}
+.empty p{font-size:15px}
+
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(26,24,20,0.5);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:var(--card-radius);padding:2rem;max-width:440px;width:90%;position:relative}
+.modal h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;margin-bottom:6px}
+.modal p{font-size:13px;color:var(--text-mid);margin-bottom:1.5rem}
+.modal-close{position:absolute;top:16px;right:16px;background:transparent;border:none;cursor:pointer;color:var(--text-light);font-size:20px;line-height:1}
+.drop-zone{
+  border:2px dashed var(--border);border-radius:10px;
+  padding:2.5rem;text-align:center;cursor:pointer;
+  transition:all 0.15s;margin-bottom:1.5rem;
+}
+.drop-zone:hover{border-color:var(--rust);background:var(--rust-bg)}
+.drop-zone i{font-size:32px;color:var(--text-light);display:block;margin-bottom:8px}
+.drop-zone p{font-size:13px;color:var(--text-mid)}
+.drop-zone small{font-size:11px;color:var(--text-light)}
+.modal-btns{display:flex;gap:10px}
+.btn-outline{
+  flex:1;padding:11px;border:1px solid var(--border);
+  border-radius:var(--tag-radius);background:transparent;
+  font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;
+  color:var(--text);transition:all 0.15s;
+}
+.btn-outline:hover{background:var(--cream)}
+.btn-rust{
+  flex:1;padding:11px;border:none;border-radius:var(--tag-radius);
+  background:var(--rust);color:white;font-family:'Inter',sans-serif;
+  font-size:13px;font-weight:500;cursor:pointer;transition:background 0.15s;
+}
+.btn-rust:hover{background:var(--rust-dark)}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:2rem;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--text);color:var(--cream);
+  padding:11px 22px;border-radius:var(--tag-radius);
+  font-size:13px;font-weight:500;transition:transform 0.3s;
+  z-index:999;pointer-events:none;white-space:nowrap;
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel{background:linear-gradient(90deg,var(--border) 25%,var(--cream) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;animation:spin 1s linear infinite}
+.analysis-step{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-mid);background:var(--cream);border-radius:8px;padding:9px 12px;transition:all .3s}
+.analysis-step.done{color:#1D9E75;background:#E1F5EE}
+.analysis-step.pending{opacity:.4}
+.analysis-step i{font-size:16px;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">Closet</div>
+  <nav>
+    <a onclick="goTo('dashboard',this)">Dashboard</a>
+    <a class="active" onclick="goTo('wardrobe',this)">Wardrobe</a>
+    <a onclick="goTo('looks',this)">Looks</a>
+    <a onclick="goTo('shop',this)">Shop</a>
+  </nav>
+</header>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div id="page-dashboard" class="page">
+  <div class="page-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Visão geral do seu guarda-roupa.</p>
+    </div>
+  </div>
+  <div class="dash-grid">
+    <div class="stat-card"><div class="label">Total de peças</div><div class="value" id="stat-total">24</div><div class="sub">no guarda-roupa</div></div>
+    <div class="stat-card"><div class="label">Looks salvos</div><div class="value" id="stat-looks">0</div><div class="sub">combinações criadas</div></div>
+    <div class="stat-card"><div class="label">Categorias</div><div class="value">6</div><div class="sub">tipos de peças</div></div>
+  </div>
+  <p class="recent-title">Adicionadas recentemente</p>
+  <div class="recent-grid" id="dash-recent"></div>
+</div>
+
+<!-- ══════════════ WARDROBE ══════════════ -->
+<div id="page-wardrobe" class="page active">
+  <div class="page-header">
+    <div>
+      <h1>Wardrobe</h1>
+      <p>Manage your clothing items.</p>
+    </div>
+    <button class="btn-add" onclick="openModal()"><i class="ti ti-plus"></i> Add Item</button>
+  </div>
+
+  <div class="wardrobe-layout">
+    <div>
+      <!-- Search bar -->
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" id="wardrobe-search" placeholder="Search your wardrobe..." oninput="filterWardrobe()">
+        <div class="search-divider"></div>
+        <select class="cat-select" id="wardrobe-cat" onchange="filterWardrobe()">
+          <option value="all">All Categories</option>
+          <option value="tops">Tops</option>
+          <option value="bottoms">Bottoms</option>
+          <option value="dresses">Dresses</option>
+          <option value="outerwear">Outerwear</option>
+          <option value="shoes">Shoes</option>
+          <option value="accessories">Accessories</option>
+        </select>
+      </div>
+      <div class="clothes-grid" id="clothes-grid"></div>
+    </div>
+
+    <!-- AI Sidebar -->
+    <div class="ai-sidebar">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+        <span class="ai-dot"></span>
+        <h3 style="margin:0">AI Stylist</h3>
+      </div>
+      <p>Select items to get outfit recommendations.</p>
+      <div class="selected-chips" id="chips">
+        <span style="font-size:12px;color:var(--text-light)">No items selected</span>
+      </div>
+      <button class="btn-recommend" id="btn-rec" onclick="getRecommendation()" disabled>
+        <i class="ti ti-sparkles"></i> Suggest complements
+      </button>
+      <div id="rec-result" style="display:none">
+        <hr class="thin">
+        <div class="ai-box" id="rec-text"></div>
+        <div id="rec-tags" style="margin-top:8px"></div>
+      </div>
+      <hr class="thin">
+      <p style="font-size:12px;font-weight:500;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Tip of the day</p>
+      <div class="ai-box">
+        <strong style="display:block;margin-bottom:4px;color:var(--text);font-weight:500">Minimalist look</strong>
+        Combine neutral pieces (black, white, beige) with one statement accessory. Less is more.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ LOOKS ══════════════ -->
+<div id="page-looks" class="page">
+  <div class="page-header">
+    <div>
+      <h1>Looks</h1>
+      <p>Click a piece to add it to your outfit.</p>
+    </div>
+    <button class="btn-add" onclick="saveLook()"><i class="ti ti-device-floppy"></i> Save Look</button>
+  </div>
+
+  <div class="looks-layout">
+
+    <!-- ── LEFT: piece picker ── -->
+    <div class="piece-picker">
+      <h3>Your pieces</h3>
+      <div class="picker-cats">
+        <button class="pcat on" onclick="setPicCat('all',this)">All</button>
+        <button class="pcat" onclick="setPicCat('tops',this)">Tops</button>
+        <button class="pcat" onclick="setPicCat('bottoms',this)">Bottoms</button>
+        <button class="pcat" onclick="setPicCat('dresses',this)">Dresses</button>
+        <button class="pcat" onclick="setPicCat('outerwear',this)">Outer</button>
+        <button class="pcat" onclick="setPicCat('shoes',this)">Shoes</button>
+        <button class="pcat" onclick="setPicCat('accessories',this)">Acc.</button>
+      </div>
+      <div class="picker-grid" id="picker-grid"></div>
+    </div>
+
+    <!-- ── CENTER: mannequin + slots ── -->
+    <div>
+      <div class="look-builder">
+        <h2>Outfit Builder</h2>
+        <div class="builder-body">
+
+          <!-- SVG mannequin — fitting room style -->
+          <div class="mannequin-wrap">
+            <svg id="mannequin-svg" width="200" height="500" viewBox="0 0 200 500" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="skin" cx="48%" cy="30%" r="70%">
+                  <stop offset="0%" stop-color="#D9997A"/>
+                  <stop offset="60%" stop-color="#C07F5C"/>
+                  <stop offset="100%" stop-color="#A86840"/>
+                </radialGradient>
+                <radialGradient id="skinDark" cx="50%" cy="50%" r="60%">
+                  <stop offset="0%" stop-color="#B87050"/>
+                  <stop offset="100%" stop-color="#9A5C38"/>
+                </radialGradient>
+                <radialGradient id="faceGrad" cx="45%" cy="35%" r="65%">
+                  <stop offset="0%" stop-color="#E0A882"/>
+                  <stop offset="100%" stop-color="#C07858"/>
+                </radialGradient>
+                <linearGradient id="lipGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#C87070"/>
+                  <stop offset="100%" stop-color="#A84848"/>
+                </linearGradient>
+                <!-- bra: nude/beige -->
+                <linearGradient id="braGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#D4A882"/>
+                  <stop offset="100%" stop-color="#B88E68"/>
+                </linearGradient>
+                <!-- panty: nude/beige -->
+                <linearGradient id="pantyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#C89870"/>
+                  <stop offset="100%" stop-color="#A87850"/>
+                </linearGradient>
+              </defs>
+
+              <!-- ══════════════════════════════════
+                   LAYER 0 — HAIR BACK VOLUME
+              ══════════════════════════════════ -->
+              <ellipse cx="100" cy="52" rx="48" ry="52" fill="#1C0F07"/>
+              <ellipse cx="58"  cy="78"  rx="20" ry="36" fill="#231408" transform="rotate(-12 58 78)"/>
+              <ellipse cx="52"  cy="118" rx="17" ry="30" fill="#1A0E06" transform="rotate(-18 52 118)"/>
+              <ellipse cx="60"  cy="155" rx="14" ry="24" fill="#231408" transform="rotate(-8 60 155)"/>
+              <ellipse cx="62"  cy="188" rx="12" ry="20" fill="#1C0F07" transform="rotate(-4 62 188)"/>
+              <ellipse cx="142" cy="78"  rx="20" ry="36" fill="#231408" transform="rotate(12 142 78)"/>
+              <ellipse cx="148" cy="118" rx="17" ry="30" fill="#1A0E06" transform="rotate(18 148 118)"/>
+              <ellipse cx="140" cy="155" rx="14" ry="24" fill="#231408" transform="rotate(8 140 155)"/>
+              <ellipse cx="138" cy="188" rx="12" ry="20" fill="#1C0F07" transform="rotate(4 138 188)"/>
+
+              <!-- ══════════════════════════════════
+                   LAYER 1 — BODY (skin)
+              ══════════════════════════════════ -->
+
+              <!-- torso — hourglass shape -->
+              <path d="
+                M 74,108
+                C 62,112 58,122 57,136
+                C 56,150 58,160 62,168
+                C 58,172 56,180 57,190
+                C 58,204 66,212 78,216
+                L 122,216
+                C 134,212 142,204 143,190
+                C 144,180 142,172 138,168
+                C 142,160 144,150 143,136
+                C 142,122 138,112 126,108
+                C 118,104 108,102 100,102
+                C 92,102 82,104 74,108 Z
+              " fill="url(#skin)"/>
+
+              <!-- shadow on torso sides -->
+              <path d="M57,136 C56,150 58,160 62,168 C58,172 56,180 57,190 C57,185 59,175 63,169 C60,162 59,151 60,138 Z" fill="#A06040" opacity="0.25"/>
+              <path d="M143,136 C144,150 142,160 138,168 C142,172 144,180 143,190 C143,185 141,175 137,169 C140,162 141,151 140,138 Z" fill="#A06040" opacity="0.25"/>
+
+              <!-- belly button -->
+              <ellipse cx="100" cy="192" rx="2.5" ry="1.5" fill="#A06040" opacity="0.5"/>
+
+              <!-- upper chest / décolleté -->
+              <path d="M 74,108 C 82,104 92,102 100,102 C 108,102 118,104 126,108 C 118,106 108,105 100,105 C 92,105 82,106 74,108Z" fill="#C07858" opacity="0.3"/>
+
+              <!-- hips -->
+              <path d="
+                M 78,216 L 122,216
+                C 136,218 146,226 148,240
+                C 150,252 146,262 140,268
+                L 60,268
+                C 54,262 50,252 52,240
+                C 54,226 64,218 78,216 Z
+              " fill="url(#skin)"/>
+
+              <!-- legs -->
+              <!-- left thigh -->
+              <path d="M 68,265 C 60,268 55,278 54,292 L 56,340 C 57,350 62,356 70,358 C 78,360 84,356 86,348 L 88,300 C 88,286 82,270 68,265 Z" fill="url(#skin)"/>
+              <!-- right thigh -->
+              <path d="M 132,265 C 140,268 145,278 146,292 L 144,340 C 143,350 138,356 130,358 C 122,360 116,356 114,348 L 112,300 C 112,286 118,270 132,265 Z" fill="url(#skin)"/>
+
+              <!-- left calf -->
+              <path d="M 56,338 C 54,352 55,368 58,382 C 60,392 65,398 72,400 C 79,402 85,398 87,390 C 89,380 88,364 86,348 C 84,356 78,360 70,358 C 62,356 57,350 56,338 Z" fill="url(#skin)"/>
+              <!-- right calf -->
+              <path d="M 144,338 C 146,352 145,368 142,382 C 140,392 135,398 128,400 C 121,402 115,398 113,390 C 111,380 112,364 114,348 C 116,356 122,360 130,358 C 138,356 143,350 144,338 Z" fill="url(#skin)"/>
+
+              <!-- knee highlights -->
+              <ellipse cx="71" cy="338" rx="9" ry="6" fill="#C87860" opacity="0.25"/>
+              <ellipse cx="129" cy="338" rx="9" ry="6" fill="#C87860" opacity="0.25"/>
+
+              <!-- ankles & feet -->
+              <ellipse cx="65"  cy="400" rx="10" ry="7" fill="url(#skinDark)"/>
+              <ellipse cx="135" cy="400" rx="10" ry="7" fill="url(#skinDark)"/>
+              <!-- feet -->
+              <path d="M 55,400 Q 55,410 60,414 Q 68,418 76,414 Q 80,410 78,404 Z" fill="url(#skinDark)"/>
+              <path d="M 145,400 Q 145,410 140,414 Q 132,418 124,414 Q 120,410 122,404 Z" fill="url(#skinDark)"/>
+
+              <!-- arms — left (upper + forearm in one clean shape) -->
+              <path d="M 72,112 C 64,116 58,126 55,140 C 52,156 51,174 53,192 C 54,204 56,216 58,226 C 59,232 63,235 68,235 C 73,235 76,231 76,225 C 75,212 73,196 73,180 C 73,162 75,144 78,128 C 79,122 78,116 72,112 Z" fill="url(#skin)"/>
+              <!-- arms — right -->
+              <path d="M 128,112 C 136,116 142,126 145,140 C 148,156 149,174 147,192 C 146,204 144,216 142,226 C 141,232 137,235 132,235 C 127,235 124,231 124,225 C 125,212 127,196 127,180 C 127,162 125,144 122,128 C 121,122 122,116 128,112 Z" fill="url(#skin)"/>
+              <!-- arm shadow inner -->
+              <path d="M 73,180 C 73,162 75,144 78,128 C 77,144 76,162 76,180 C 76,196 77,212 78,225 C 76,216 74,200 73,180 Z" fill="#A06040" opacity="0.2"/>
+              <path d="M 127,180 C 127,162 125,144 122,128 C 123,144 124,162 124,180 C 124,196 123,212 122,225 C 124,216 126,200 127,180 Z" fill="#A06040" opacity="0.2"/>
+              <!-- hands -->
+              <ellipse cx="67"  cy="239" rx="9" ry="11" fill="url(#skin)"/>
+              <ellipse cx="133" cy="239" rx="9" ry="11" fill="url(#skin)"/>
+
+              <!-- ══════════════════════════════════
+                   LAYER 2 — LINGERIE BASE
+              ══════════════════════════════════ -->
+
+              <!-- CALCINHA (panty) — bikini cut hugging hips -->
+              <path d="
+                M 62,240
+                C 60,248 61,256 66,262
+                C 74,272 86,276 100,276
+                C 114,276 126,272 134,262
+                C 139,256 140,248 138,240
+                C 130,236 116,234 100,234
+                C 84,234 70,236 62,240 Z
+              " fill="url(#pantyGrad)" id="layer-panty"/>
+              <!-- panty waistband -->
+              <path d="M 62,240 C 70,236 84,234 100,234 C 116,234 130,236 138,240" stroke="#C8986A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <!-- panty center v detail -->
+              <path d="M 84,238 Q 100,256 116,238" stroke="#D4A87A" stroke-width="1" fill="none" opacity="0.5"/>
+
+              <!-- SUTIÃ (bra) — fitted triangle cups -->
+              <!-- left cup -->
+              <path d="M 72,122 C 68,124 67,132 70,140 C 73,147 80,150 88,149 C 95,148 99,142 99,135 C 99,128 94,121 86,118 C 80,116 75,118 72,122 Z" fill="url(#braGrad)" id="layer-bra-l"/>
+              <!-- right cup -->
+              <path d="M 128,122 C 132,124 133,132 130,140 C 127,147 120,150 112,149 C 105,148 101,142 101,135 C 101,128 106,121 114,118 C 120,116 125,118 128,122 Z" fill="url(#braGrad)" id="layer-bra-r"/>
+              <!-- bra center bridge -->
+              <path d="M 99,130 Q 100,135 101,130 L 101,142 Q 100,145 99,142 Z" fill="#B88060"/>
+              <!-- underwire detail left cup -->
+              <path d="M 70,140 C 73,147 80,150 90,149" stroke="#C8986A" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+              <!-- underwire detail right cup -->
+              <path d="M 130,140 C 127,147 120,150 110,149" stroke="#C8986A" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+              <!-- bra straps left -->
+              <path d="M 76,118 C 78,110 82,104 85,100" stroke="#C89870" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <!-- bra straps right -->
+              <path d="M 124,118 C 122,110 118,104 115,100" stroke="#C89870" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <!-- bra back band -->
+              <path d="M 70,142 C 64,144 60,147 58,150" stroke="#C89870" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.55"/>
+              <path d="M 130,142 C 136,144 140,147 142,150" stroke="#C89870" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.55"/>
+
+              <!-- ══════════════════════════════════
+                   LAYER 3 — CLOTHING (toggled by JS)
+              ══════════════════════════════════ -->
+
+              <!-- TOP garment slot — hidden by default, shown when item selected -->
+              <g id="cloth-top" style="display:none">
+                <path id="m-top" d="
+                  M 72,108
+                  C 62,112 57,124 56,138
+                  L 55,200 C 55,206 60,210 68,210
+                  L 132,210 C 140,210 145,206 145,200
+                  L 144,138 C 143,124 138,112 128,108
+                  C 118,104 108,102 100,102
+                  C 92,102 82,104 72,108 Z
+                " fill="#E8E4DE"/>
+                <!-- collar/neckline hint -->
+                <path id="m-top-neck" d="M 82,108 Q 100,114 118,108" stroke="#D0CCC6" stroke-width="1" fill="none"/>
+                <!-- fabric shadow left -->
+                <path d="M 56,138 C 56,152 58,164 62,172 L 60,210 L 55,210 L 55,138 Z" fill="#000" opacity="0.06"/>
+                <!-- fabric shadow right -->
+                <path d="M 144,138 C 144,152 142,164 138,172 L 140,210 L 145,210 L 145,138 Z" fill="#000" opacity="0.06"/>
+              </g>
+
+              <!-- BOTTOM garment slot -->
+              <g id="cloth-bottom" style="display:none">
+                <path id="m-bottom" d="
+                  M 57,214
+                  C 55,222 54,232 55,244
+                  C 56,250 60,256 66,260
+                  L 70,300 C 71,316 70,334 68,356
+                  C 67,368 67,384 67,400
+                  L 81,400 C 81,382 81,364 82,350
+                  C 83,332 85,314 88,296
+                  C 92,290 96,288 100,288
+                  C 104,288 108,290 112,296
+                  C 115,314 117,332 118,350
+                  C 119,364 119,382 119,400
+                  L 133,400 C 133,384 133,368 132,356
+                  C 130,334 129,316 130,300
+                  L 134,260 C 140,256 144,250 145,244
+                  C 146,232 145,222 143,214 Z
+                " fill="#4B6B9A"/>
+                <!-- waistband -->
+                <path id="m-belt" d="M 57,214 L 143,214 L 143,224 C 128,228 112,230 100,230 C 88,230 72,228 57,224 Z" fill="#3A5580"/>
+                <!-- center seam -->
+                <path d="M 100,230 L 100,288" stroke="#000" stroke-width="1" fill="none" opacity="0.12"/>
+                <!-- left leg seam shadow -->
+                <path d="M 68,300 C 66,320 66,360 67,400 L 73,400 C 72,364 71,330 72,304 Z" fill="#000" opacity="0.07"/>
+                <!-- right leg seam shadow -->
+                <path d="M 132,300 C 134,320 134,360 133,400 L 127,400 C 128,364 129,330 128,304 Z" fill="#000" opacity="0.07"/>
+              </g>
+
+              <!-- DRESS slot — replaces top+bottom -->
+              <g id="cloth-dress" style="display:none">
+                <!-- bodice -->
+                <path id="m-dress-bodice" d="
+                  M 72,108
+                  C 62,112 57,124 56,138
+                  L 55,186 C 55,192 58,196 64,198
+                  L 136,198 C 142,196 145,192 145,186
+                  L 144,138 C 143,124 138,112 128,108
+                  C 118,104 108,102 100,102
+                  C 92,102 82,104 72,108 Z
+                " fill="#D4A0B0"/>
+                <!-- dress skirt flares from waist -->
+                <path id="m-top" d="
+                  M 55,190
+                  C 50,198 44,212 42,230 L 40,290
+                  C 40,300 44,308 52,310
+                  L 148,310 C 156,308 160,300 160,290
+                  L 158,230 C 156,212 150,198 145,190 Z
+                " fill="#D4A0B0"/>
+                <!-- skirt hem wave -->
+                <path d="M 40,306 Q 55,316 70,308 Q 85,316 100,308 Q 115,316 130,308 Q 145,316 160,306" stroke="#C09098" stroke-width="1.5" fill="none"/>
+                <!-- bodice shadow -->
+                <path d="M 56,138 L 55,190 C 58,192 62,194 66,194 L 64,138 Z" fill="#000" opacity="0.07"/>
+                <path d="M 144,138 L 145,190 C 142,192 138,194 134,194 L 136,138 Z" fill="#000" opacity="0.07"/>
+                <!-- invisible target for JS color -->
+                <rect id="m-bottom" x="0" y="0" width="0" height="0" fill="none"/>
+                <rect id="m-belt" x="0" y="0" width="0" height="0" fill="none"/>
+              </g>
+
+              <!-- OUTERWEAR slot — drawn on top of everything -->
+              <g id="cloth-outer" style="display:none">
+                <path id="m-outer" d="
+                  M 68,104
+                  C 56,108 50,120 48,136
+                  L 46,210 C 46,218 52,224 60,224
+                  L 140,224 C 148,224 154,218 154,210
+                  L 152,136 C 150,120 144,108 132,104
+                  C 120,100 108,98 100,98
+                  C 92,98 80,100 68,104 Z
+                " fill="#C4A96A" opacity="0.92"/>
+                <!-- lapel left -->
+                <path d="M 68,104 L 78,128 L 100,118 Z" fill="#B89850"/>
+                <!-- lapel right -->
+                <path d="M 132,104 L 122,128 L 100,118 Z" fill="#B89850"/>
+                <!-- buttons -->
+                <circle cx="100" cy="140" r="3" fill="#A08040"/>
+                <circle cx="100" cy="158" r="3" fill="#A08040"/>
+                <circle cx="100" cy="176" r="3" fill="#A08040"/>
+              </g>
+
+              <!-- SHOES slot -->
+              <g id="cloth-shoes">
+                <!-- bare feet toenails hint (default) -->
+                <path id="m-sl" d="M 55,400 Q 55,410 60,414 Q 68,418 76,414 Q 80,410 78,404 Z" fill="url(#skinDark)"/>
+                <path id="m-sr" d="M 145,400 Q 145,410 140,414 Q 132,418 124,414 Q 120,410 122,404 Z" fill="url(#skinDark)"/>
+              </g>
+
+              <!-- ══════════════════════════════════
+                   LAYER 4 — NECK
+              ══════════════════════════════════ -->
+              <path d="M 88,90 C 86,96 86,102 88,108 C 92,112 108,112 112,108 C 114,102 114,96 112,90 C 108,86 92,86 88,90 Z" fill="url(#skin)"/>
+              <!-- collarbone hints -->
+              <path d="M 72,108 C 80,106 90,104 100,104" stroke="#B07050" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.4"/>
+              <path d="M 128,108 C 120,106 110,104 100,104" stroke="#B07050" stroke-width="1.2" fill="none" stroke-linecap="round" opacity="0.4"/>
+
+              <!-- ══════════════════════════════════
+                   LAYER 5 — HEAD
+              ══════════════════════════════════ -->
+
+              <!-- face shape -->
+              <path d="M 68,48 C 66,62 66,76 68,86 C 70,96 78,104 88,108 C 92,110 96,110 100,110 C 104,110 108,110 112,108 C 122,104 130,96 132,86 C 134,76 134,62 132,48 C 128,36 116,28 100,28 C 84,28 72,36 68,48 Z" fill="url(#faceGrad)"/>
+
+              <!-- ear left -->
+              <path d="M 68,58 C 62,60 60,66 60,72 C 60,78 62,82 68,82 Z" fill="url(#skin)"/>
+              <!-- ear right -->
+              <path d="M 132,58 C 138,60 140,66 140,72 C 140,78 138,82 132,82 Z" fill="url(#skin)"/>
+              <!-- ear inner -->
+              <path d="M 68,64 C 65,66 64,72 65,76" stroke="#A06040" stroke-width="1" fill="none" opacity="0.35"/>
+              <path d="M 132,64 C 135,66 136,72 135,76" stroke="#A06040" stroke-width="1" fill="none" opacity="0.35"/>
+
+              <!-- jaw softener -->
+              <ellipse cx="100" cy="100" rx="22" ry="10" fill="url(#faceGrad)"/>
+
+              <!-- HAIR FRONT over face -->
+              <path d="M 68,48 C 70,36 80,26 100,24 C 120,26 130,36 132,48 C 126,40 114,35 100,35 C 86,35 74,40 68,48 Z" fill="#1C0F07"/>
+              <path d="M 68,48 C 66,56 66,64 68,72 C 70,62 72,54 76,50 Z" fill="#231408"/>
+              <path d="M 132,48 C 134,56 134,64 132,72 C 130,62 128,54 124,50 Z" fill="#231408"/>
+              <!-- curly top strands -->
+              <path d="M 80,30 C 76,22 80,14 84,12 C 82,20 82,28 82,34 Z" fill="#2C1A0E"/>
+              <path d="M 92,26 C 90,16 96,8 100,8 C 98,16 97,24 97,30 Z" fill="#1C0F07"/>
+              <path d="M 108,26 C 110,16 104,8 100,8 C 102,16 103,24 103,30 Z" fill="#2C1A0E"/>
+              <path d="M 120,30 C 124,22 120,14 116,12 C 118,20 118,28 118,34 Z" fill="#1C0F07"/>
+
+              <!-- EYES -->
+              <ellipse cx="84"  cy="62" rx="8"   ry="5.5" fill="#F0ECE6"/>
+              <ellipse cx="116" cy="62" rx="8"   ry="5.5" fill="#F0ECE6"/>
+              <circle  cx="84"  cy="62" r="4.5"  fill="#1C0E06"/>
+              <circle  cx="116" cy="62" r="4.5"  fill="#1C0E06"/>
+              <circle  cx="84"  cy="62" r="2.3"  fill="#0A0604"/>
+              <circle  cx="116" cy="62" r="2.3"  fill="#0A0604"/>
+              <circle  cx="85.5" cy="60.5" r="1.2" fill="white"/>
+              <circle  cx="117.5" cy="60.5" r="1.2" fill="white"/>
+              <!-- eyelid crease -->
+              <path d="M 76,58 Q 84,54 92,58" stroke="#1C0E06" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+              <path d="M 108,58 Q 116,54 124,58" stroke="#1C0E06" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+              <!-- lower lid -->
+              <path d="M 77,66 Q 84,68 91,66" stroke="#7A4020" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.5"/>
+              <path d="M 109,66 Q 116,68 123,66" stroke="#7A4020" stroke-width="0.9" fill="none" stroke-linecap="round" opacity="0.5"/>
+
+              <!-- EYEBROWS — thick, slightly arched -->
+              <path d="M 76,52 Q 84,47 93,50"  stroke="#1C0E06" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+              <path d="M 107,50 Q 116,47 124,52" stroke="#1C0E06" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+
+              <!-- NOSE -->
+              <path d="M 98,68 L 96,78 Q 100,81 104,78 L 102,68 Z" fill="#A86040" opacity="0.35"/>
+              <ellipse cx="96"  cy="79" rx="3.5" ry="2.5" fill="#A06038" opacity="0.3"/>
+              <ellipse cx="104" cy="79" rx="3.5" ry="2.5" fill="#A06038" opacity="0.3"/>
+              <!-- nostril hint -->
+              <path d="M 93,78 Q 96,80 99,79" stroke="#8A4828" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>
+              <path d="M 107,78 Q 104,80 101,79" stroke="#8A4828" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.5"/>
+
+              <!-- LIPS -->
+              <path d="M 88,88 Q 94,84 100,85 Q 106,84 112,88 Q 106,91 100,91 Q 94,91 88,88 Z" fill="url(#lipGrad)"/>
+              <path d="M 88,88 Q 100,97 112,88 Q 106,93 100,95 Q 94,93 88,88 Z" fill="#C06868"/>
+              <path d="M 88,88 Q 94,86 100,87 Q 106,86 112,88" stroke="#904040" stroke-width="0.7" fill="none"/>
+              <!-- lip highlight -->
+              <ellipse cx="100" cy="92" rx="5" ry="1.5" fill="white" opacity="0.12"/>
+
+              <!-- CHEEKS blush -->
+              <ellipse cx="76"  cy="74" rx="9" ry="6" fill="#E89878" opacity="0.15"/>
+              <ellipse cx="124" cy="74" rx="9" ry="6" fill="#E89878" opacity="0.15"/>
+
+              <!-- HAIR FRONT curly pieces over forehead -->
+              <path d="M 76,34 C 72,44 72,56 76,64 C 74,54 75,44 78,36 Z" fill="#231408" opacity="0.8"/>
+              <path d="M 124,34 C 128,44 128,56 124,64 C 126,54 125,44 122,36 Z" fill="#231408" opacity="0.8"/>
+
+              <!-- necklace gold -->
+              <path d="M 84,112 Q 100,120 116,112" stroke="#C8A840" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+              <circle cx="100" cy="121" r="2.8" fill="#C8A840"/>
+
+            </svg>
+            <button style="font-size:11px;color:var(--text-light);background:transparent;border:none;cursor:pointer;text-decoration:underline;margin-top:6px" onclick="clearLook()">Clear all</button>
+
+            <!-- ══ TRY-ON REAL (FASHN) ══ -->
+            <div style="margin-top:1rem;width:100%;border-top:1px solid var(--border);padding-top:1rem">
+              <div id="tryon-result" style="display:none;margin-bottom:10px">
+                <img id="tryon-img" src="" alt="try-on" style="width:100%;border-radius:10px;border:1px solid var(--border)">
+                <button onclick="document.getElementById('tryon-result').style.display='none'" style="font-size:11px;color:var(--text-light);background:transparent;border:none;cursor:pointer;text-decoration:underline;margin-top:4px">Voltar ao boneco</button>
+              </div>
+              <p style="font-size:11px;font-weight:500;color:var(--text-mid);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Try-on realista</p>
+              <p style="font-size:11px;color:var(--text-light);margin-bottom:8px" id="tryon-photo-status">Envie uma foto sua de corpo inteiro</p>
+              <input type="file" id="my-photo-input" accept="image/*" style="display:none" onchange="handleMyPhoto(event)">
+              <button class="btn-recommend" style="margin-bottom:6px" onclick="document.getElementById('my-photo-input').click()">
+                <i class="ti ti-camera"></i> <span id="my-photo-btn-label">Adicionar minha foto</span>
+              </button>
+              <button class="btn-recommend" id="btn-tryon" style="background:#1D9E75" onclick="generateTryOn()" disabled>
+                <i class="ti ti-sparkles"></i> Gerar try-on realista
+              </button>
+            </div>
+          </div>
+
+          <!-- Slots column -->
+          <div class="slots-col">
+            <div class="slot" id="slot-tops" onclick="openPicCat('tops')">
+              <i class="ti ti-shirt slot-icon"></i>
+              <div class="slot-body">
+                <div class="slot-label">Top / Blusa</div>
+                <div class="slot-name">Click a piece to add</div>
+              </div>
+              <img class="slot-img" src="" alt="">
+              <button class="slot-remove" onclick="event.stopPropagation();removeSlot('tops')"><i class="ti ti-x"></i></button>
+            </div>
+            <div class="slot" id="slot-bottoms" onclick="openPicCat('bottoms')">
+              <i class="ti ti-layout-bottombar slot-icon"></i>
+              <div class="slot-body">
+                <div class="slot-label">Bottom / Calça</div>
+                <div class="slot-name">Click a piece to add</div>
+              </div>
+              <img class="slot-img" src="" alt="">
+              <button class="slot-remove" onclick="event.stopPropagation();removeSlot('bottoms')"><i class="ti ti-x"></i></button>
+            </div>
+            <div class="slot" id="slot-dresses" onclick="openPicCat('dresses')">
+              <i class="ti ti-ripple slot-icon"></i>
+              <div class="slot-body">
+                <div class="slot-label">Vestido / Macacão</div>
+                <div class="slot-name">Click a piece to add</div>
+              </div>
+              <img class="slot-img" src="" alt="">
+              <button class="slot-remove" onclick="event.stopPropagation();removeSlot('dresses')"><i class="ti ti-x"></i></button>
+            </div>
+            <div class="slot" id="slot-outerwear" onclick="openPicCat('outerwear')">
+              <i class="ti ti-coat slot-icon"></i>
+              <div class="slot-body">
+                <div class="slot-label">Casaco / Outer</div>
+                <div class="slot-name">Click a piece to add</div>
+              </div>
+              <img class="slot-img" src="" alt="">
+              <button class="slot-remove" onclick="event.stopPropagation();removeSlot('outerwear')"><i class="ti ti-x"></i></button>
+            </div>
+            <div class="slot" id="slot-shoes" onclick="openPicCat('shoes')">
+              <i class="ti ti-shoe slot-icon"></i>
+              <div class="slot-body">
+                <div class="slot-label">Calçados</div>
+                <div class="slot-name">Click a piece to add</div>
+              </div>
+              <img class="slot-img" src="" alt="">
+              <button class="slot-remove" onclick="event.stopPropagation();removeSlot('shoes')"><i class="ti ti-x"></i></button>
+            </div>
+            <div class="slot" id="slot-accessories" onclick="openPicCat('accessories')">
+              <i class="ti ti-diamond slot-icon"></i>
+              <div class="slot-body">
+                <div class="slot-label">Acessórios</div>
+                <div class="slot-name">Click a piece to add</div>
+              </div>
+              <img class="slot-img" src="" alt="">
+              <button class="slot-remove" onclick="event.stopPropagation();removeSlot('accessories')"><i class="ti ti-x"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="recent-title" style="margin-top:2rem">Saved Looks</p>
+      <div class="saved-looks-grid" id="saved-looks">
+        <p style="font-size:13px;color:var(--text-light);grid-column:1/-1">No looks saved yet. Build one and save it!</p>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: AI sidebar ── -->
+    <div class="look-sidebar">
+      <h3>AI Stylist</h3>
+      <p style="font-size:13px;color:var(--text-mid);margin-bottom:1rem">Choose an occasion for personalized advice.</p>
+      <label class="occ-label"><input type="radio" name="occ" value="casual" checked> Casual</label>
+      <label class="occ-label"><input type="radio" name="occ" value="work"> Work</label>
+      <label class="occ-label"><input type="radio" name="occ" value="party"> Party / Night out</label>
+      <label class="occ-label" style="margin-bottom:1rem"><input type="radio" name="occ" value="sport"> Sport / Active</label>
+      <button class="btn-recommend" onclick="getLookAdvice()"><i class="ti ti-sparkles"></i> Analyze current look</button>
+      <div id="look-adv" style="display:none;margin-top:1rem">
+        <hr class="thin">
+        <div class="ai-box" id="look-adv-text"></div>
+      </div>
+      <hr class="thin">
+      <p style="font-size:12px;font-weight:500;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Trending now</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="ai-box" style="cursor:pointer" onclick="applyTrend('coastal')"><strong style="color:var(--text)">🌊 Coastal grandmother</strong><br><span style="font-size:12px">Linen, neutral tones, stripes</span></div>
+        <div class="ai-box" style="cursor:pointer" onclick="applyTrend('quiet')"><strong style="color:var(--text)">🤍 Quiet luxury</strong><br><span style="font-size:12px">Solids, classic cuts, no logos</span></div>
+        <div class="ai-box" style="cursor:pointer" onclick="applyTrend('y2k')"><strong style="color:var(--text)">✨ Y2K revival</strong><br><span style="font-size:12px">Metallics, cut-outs, low-rise</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ SHOP ══════════════ -->
+<div id="page-shop" class="page">
+  <div class="page-header">
+    <div>
+      <h1>Shop</h1>
+      <p>Find new pieces to complement your wardrobe.</p>
+    </div>
+  </div>
+  <div class="shop-top">
+    <div class="shop-search-wrap">
+      <i class="ti ti-search" style="font-size:20px;color:var(--text-light)"></i>
+      <input type="text" id="shop-input" placeholder="Search for clothes, brands or styles..." onkeydown="if(event.key==='Enter')searchShop()">
+    </div>
+    <button class="btn-shop-search" onclick="searchShop()">Search</button>
+  </div>
+  <div class="filters">
+    <button class="fchip on" onclick="setFilter(this,'all')">All</button>
+    <button class="fchip" onclick="setFilter(this,'tops')">Tops</button>
+    <button class="fchip" onclick="setFilter(this,'pants')">Bottoms</button>
+    <button class="fchip" onclick="setFilter(this,'dresses')">Dresses</button>
+    <button class="fchip" onclick="setFilter(this,'shoes')">Shoes</button>
+    <button class="fchip" onclick="setFilter(this,'accessories')">Accessories</button>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-mid)">
+      R$ <input type="number" id="pmin" placeholder="0" style="width:70px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--white);font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none">
+      – <input type="number" id="pmax" placeholder="2000" style="width:70px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--white);font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none">
+    </div>
+  </div>
+  <div class="ai-banner" id="ai-banner">
+    <i class="ti ti-sparkles"></i>
+    <p id="ai-banner-text"></p>
+  </div>
+  <div class="shop-grid" id="shop-grid">
+    <div class="empty" style="grid-column:1/-1">
+      <i class="ti ti-search"></i>
+      <p>Search for a clothing item to see results</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-bg" id="modal">
+  <div class="modal" style="max-width:500px">
+    <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+
+    <!-- STEP 1: upload -->
+    <div id="modal-step1">
+      <h2>Add new item</h2>
+      <p>Upload a photo of yourself or just the clothing piece — the AI will identify it automatically.</p>
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-inp').click()"
+           ondragover="event.preventDefault();this.style.borderColor='var(--rust)'"
+           ondragleave="this.style.borderColor=''"
+           ondrop="event.preventDefault();handleFile({target:{files:event.dataTransfer.files}})">
+        <i class="ti ti-cloud-upload"></i>
+        <p>Drag photo here or click to browse</p>
+        <small>PNG, JPG up to 10MB · can be a photo of you wearing the piece</small>
+      </div>
+      <input type="file" id="file-inp" accept="image/*" style="display:none" onchange="handleFile(event)">
+      <div class="modal-btns">
+        <button class="btn-outline" onclick="closeModal();toast('Camera feature coming soon!')">
+          <i class="ti ti-camera" style="margin-right:4px"></i>Camera
+        </button>
+        <button class="btn-rust" onclick="addDemo()">
+          <i class="ti ti-plus" style="margin-right:4px"></i>Add example item
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: analyzing -->
+    <div id="modal-step2" style="display:none;text-align:center;padding:1rem 0">
+      <div style="width:56px;height:56px;border-radius:50%;background:var(--rust-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+        <i class="ti ti-sparkles" style="font-size:24px;color:var(--rust)"></i>
+      </div>
+      <h2 style="margin-bottom:6px">Analyzing your photo</h2>
+      <p id="analyzing-msg" style="font-size:13px;color:var(--text-mid)">Reading image with AI vision...</p>
+      <div style="margin-top:1.5rem;display:flex;flex-direction:column;gap:6px" id="analysis-steps">
+        <div class="analysis-step" id="step-a"><i class="ti ti-loader-2 spin"></i> Identifying clothing piece...</div>
+        <div class="analysis-step pending" id="step-b"><i class="ti ti-circle-dashed"></i> Extracting color & style...</div>
+        <div class="analysis-step pending" id="step-c"><i class="ti ti-circle-dashed"></i> Categorizing item...</div>
+      </div>
+    </div>
+
+    <!-- STEP 3: confirm -->
+    <div id="modal-step3" style="display:none">
+      <h2 style="margin-bottom:4px">Piece identified!</h2>
+      <p style="margin-bottom:1.25rem">The AI detected the following item. Confirm or edit before adding.</p>
+
+      <div style="display:flex;gap:1rem;margin-bottom:1.5rem;align-items:flex-start">
+        <!-- preview da foto -->
+        <div style="width:110px;flex-shrink:0;border-radius:10px;overflow:hidden;border:1px solid var(--border)">
+          <img id="preview-img" src="" alt="preview" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block">
+        </div>
+        <!-- campos editáveis -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label style="font-size:11px;font-weight:500;color:var(--text-mid);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Item name</label>
+            <input id="confirm-name" type="text" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);background:var(--white);outline:none">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:11px;font-weight:500;color:var(--text-mid);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Category</label>
+              <select id="confirm-cat" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);background:var(--white);outline:none;appearance:none">
+                <option value="tops">Tops</option>
+                <option value="bottoms">Bottoms</option>
+                <option value="dresses">Dresses</option>
+                <option value="outerwear">Outerwear</option>
+                <option value="shoes">Shoes</option>
+                <option value="accessories">Accessories</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:500;color:var(--text-mid);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">Brand (optional)</label>
+              <input id="confirm-brand" type="text" placeholder="Unknown" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);background:var(--white);outline:none">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:500;color:var(--text-mid);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:4px">AI description</label>
+            <div id="confirm-desc" style="font-size:12px;color:var(--text-mid);background:var(--cream);border-radius:8px;padding:9px 12px;line-height:1.6"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-btns">
+        <button class="btn-outline" onclick="showStep(1)"><i class="ti ti-arrow-left" style="margin-right:4px"></i>Try another photo</button>
+        <button class="btn-rust" onclick="confirmAdd()"><i class="ti ti-check" style="margin-right:4px"></i>Add to wardrobe</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────
+const ITEMS = [
+  {id:1,name:'Bolsa de Couro Marrom',brand:'AREZZO',cat:'accessories',emoji:'👜',
+   img:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80'},
+  {id:2,name:'Blazer Caramelo',brand:'RENNER',cat:'outerwear',emoji:'🧥',
+   img:'https://images.unsplash.com/photo-1525171254930-643fc658b64e?w=400&q=80'},
+  {id:3,name:'Tênis Branco Clássico',brand:'NIKE',cat:'shoes',emoji:'👟',
+   img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80'},
+  {id:4,name:'Blusa Linho Off-white',brand:'ZARA',cat:'tops',emoji:'👕',
+   img:'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?w=400&q=80'},
+  {id:5,name:'Calça Jeans Slim',brand:"LEVI'S",cat:'bottoms',emoji:'👖',
+   img:'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80'},
+  {id:6,name:'Vestido Midi Floral',brand:'FARM',cat:'dresses',emoji:'👗',
+   img:'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&q=80'},
+  {id:7,name:'Trench Coat Bege',brand:'ZARA',cat:'outerwear',emoji:'🧥',
+   img:'https://images.unsplash.com/photo-1544441893-675973e31985?w=400&q=80'},
+  {id:8,name:'Scarpin Nude',brand:'SCHUTZ',cat:'shoes',emoji:'👠',
+   img:'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&q=80'},
+  {id:9,name:'T-shirt Preta Oversized',brand:'H&M',cat:'tops',emoji:'👕',
+   img:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=400&q=80'},
+  {id:10,name:'Saia Midi Xadrez',brand:'MIXED',cat:'bottoms',emoji:'👗',
+   img:'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=400&q=80'},
+  {id:11,name:'Vestido Linho Bege',brand:'AMARO',cat:'dresses',emoji:'👗',
+   img:'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&q=80'},
+  {id:12,name:'Calça Alfaiataria Preta',brand:'ANIMALE',cat:'bottoms',emoji:'👖',
+   img:'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&q=80'},
+];
+
+const SHOP_DB = {
+  tops:[
+    {name:'Blusa Linho Off-white',brand:'Zara',store:'ZARA',price:199.90,orig:249.90,match:true,img:'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?w=400&q=80'},
+    {name:'Camisa Manga Bufante',brand:'Farm',store:'FARM RIO',price:339.00,orig:null,match:false,img:'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80'},
+    {name:'T-shirt Algodão Premium',brand:'COS',store:'COS',price:289.00,orig:null,match:true,img:'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=400&q=80'},
+    {name:'Top Cropped Listrado',brand:'Renner',store:'RENNER',price:59.90,orig:89.90,match:false,img:'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80'},
+  ],
+  bottoms:[
+    {name:'Calça Wide Leg Camel',brand:'Amaro',store:'AMARO',price:299.90,orig:null,match:true,img:'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&q=80'},
+    {name:'Jeans Slim Fit Dark',brand:"Levi's",store:"LEVI'S",price:399.00,orig:449.00,match:false,img:'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80'},
+    {name:'Calça Alfaiataria Listrada',brand:'Mixed',store:'MIXED',price:489.00,orig:null,match:true,img:'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=400&q=80'},
+    {name:'Saia Midi Envelope',brand:'Farm',store:'FARM RIO',price:359.00,orig:459.00,match:false,img:'https://images.unsplash.com/photo-1583744946564-b52ac1c389c8?w=400&q=80'},
+  ],
+  dresses:[
+    {name:'Vestido Midi Floral',brand:'Farm',store:'FARM RIO',price:449.00,orig:549.00,match:true,img:'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&q=80'},
+    {name:'Vestido Linho Bege',brand:'Zara',store:'ZARA',price:299.90,orig:null,match:false,img:'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&q=80'},
+    {name:'Midi Wrap Dress',brand:'Colcci',store:'COLCCI',price:359.00,orig:459.00,match:true,img:'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&q=80'},
+    {name:'Mini Vestido Cetim',brand:'Amaro',store:'AMARO',price:279.00,orig:null,match:false,img:'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80'},
+  ],
+  shoes:[
+    {name:'Scarpin Bico Fino Nude',brand:'Schutz',store:'SCHUTZ',price:599.90,orig:699.90,match:true,img:'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&q=80'},
+    {name:'Tênis Stan Smith',brand:'Adidas',store:'ADIDAS',price:499.99,orig:null,match:false,img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80'},
+    {name:'Mule Slouchy Bege',brand:'Arezzo',store:'AREZZO',price:399.00,orig:489.00,match:true,img:'https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?w=400&q=80'},
+    {name:'Bota Chelsea Preta',brand:'Melissa',store:'MELISSA',price:349.00,orig:null,match:false,img:'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&q=80'},
+  ],
+  accessories:[
+    {name:'Bolsa Tote Couro Natural',brand:'Arezzo',store:'AREZZO',price:599.00,orig:749.00,match:true,img:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&q=80'},
+    {name:'Cinto Fino Dourado',brand:'Farm',store:'FARM RIO',price:159.00,orig:null,match:false,img:'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&q=80'},
+    {name:'Óculos Cat Eye',brand:'Chilli Beans',store:'CHILLI BEANS',price:299.00,orig:399.00,match:true,img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400&q=80'},
+    {name:'Colar Layering Prata',brand:'Rommanel',store:'ROMMANEL',price:189.00,orig:null,match:false,img:'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&q=80'},
+  ],
+};
+
+let selected = [];
+let savedLooks = [];
+
+// ── RENDER WARDROBE ───────────────────────────────────────
+function renderClothes(items) {
+  const g = document.getElementById('clothes-grid');
+  g.innerHTML = items.map(item => `
+    <div class="cloth-card" id="card-${item.id}" onclick="toggleSelect(${item.id})">
+      <div class="cloth-photo">
+        <img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <div class="fallback" style="display:none">${item.emoji}</div>
+        <div class="cloth-check"><i class="ti ti-check"></i></div>
+      </div>
+      <div class="cloth-body">
+        <div class="cloth-name">${item.name}</div>
+        <div class="cloth-meta">
+          <span class="cloth-cat">${catLabel(item.cat)}</span>
+          <span class="cloth-brand-tag">${item.brand}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function catLabel(c){return{tops:'Tops',bottoms:'Bottoms',dresses:'Dresses',outerwear:'Outerwear',shoes:'Shoes',accessories:'Accessories'}[c]||c}
+
+function filterWardrobe() {
+  const q = document.getElementById('wardrobe-search').value.toLowerCase();
+  const cat = document.getElementById('wardrobe-cat').value;
+  const filtered = ITEMS.filter(i =>
+    (cat === 'all' || i.cat === cat) &&
+    (i.name.toLowerCase().includes(q) || i.brand.toLowerCase().includes(q))
+  );
+  renderClothes(filtered);
+  selected.forEach(id => {
+    const c = document.getElementById('card-'+id);
+    if(c) c.classList.add('selected');
+  });
+}
+
+// ── SELECTION ────────────────────────────────────────────
+function toggleSelect(id) {
+  const card = document.getElementById('card-'+id);
+  const item = ITEMS.find(i => i.id === id);
+  const idx = selected.indexOf(id);
+  if (idx === -1) {
+    if (selected.length >= 5) { toast('Max 5 items'); return; }
+    selected.push(id);
+    card.classList.add('selected');
+  } else {
+    selected.splice(idx,1);
+    card.classList.remove('selected');
+  }
+  updateChips();
+}
+
+function updateChips() {
+  const el = document.getElementById('chips');
+  const btn = document.getElementById('btn-rec');
+  if (!selected.length) {
+    el.innerHTML = '<span style="font-size:12px;color:var(--text-light)">No items selected</span>';
+    btn.disabled = true;
+    return;
+  }
+  btn.disabled = false;
+  el.innerHTML = selected.map(id => {
+    const it = ITEMS.find(i => i.id === id);
+    return `<div class="chip"><span class="emoji">${it.emoji}</span>${it.name.split(' ').slice(0,2).join(' ')}</div>`;
+  }).join('');
+}
+
+// ── AI RECOMMEND ─────────────────────────────────────────
+async function getRecommendation() {
+  if (!selected.length) return;
+  const btn = document.getElementById('btn-rec');
+  const area = document.getElementById('rec-result');
+  const txt = document.getElementById('rec-text');
+  const tags = document.getElementById('rec-tags');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite;display:inline-block"></i> Analyzing...';
+  area.style.display = 'block';
+  txt.innerHTML = '<div class="skel" style="height:11px;width:88%;margin-bottom:5px"></div><div class="skel" style="height:11px;width:74%;margin-bottom:5px"></div><div class="skel" style="height:11px;width:80%"></div>';
+  tags.innerHTML = '';
+
+  const pieces = selected.map(id => ITEMS.find(i => i.id === id)).map(i => `${i.name} (${i.brand})`).join(', ');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:'You are a chic Brazilian fashion stylist. Analyze the selected clothing items and suggest what to add to complete the look. Be concise (3-4 sentences), practical and specific. Respond in Brazilian Portuguese. At the end, list up to 5 suggestions as: SUGESTÕES: item1 | item2 | item3',
+        messages:[{role:'user',content:`Selected pieces: ${pieces}. What should I add to complete this look?`}]
+      })
+    });
+    const data = await res.json();
+    const full = data.content[0].text;
+    const parts = full.split('SUGESTÕES:');
+    txt.innerHTML = parts[0].trim();
+    if (parts[1]) {
+      tags.innerHTML = parts[1].trim().split('|').map(s=>`<span class="ai-tag">${s.trim()}</span>`).join('');
+    }
+  } catch(e) {
+    txt.innerHTML = 'Com essas peças, experimente adicionar um cinto de couro fino e brincos minimalistas. Um tênis branco ou uma mule neutra complementam perfeitamente o look.';
+    tags.innerHTML = '<span class="ai-tag">Cinto de couro</span><span class="ai-tag">Tênis branco</span><span class="ai-tag">Brincos argola</span>';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-sparkles"></i> Suggest complements';
+}
+
+// ── LOOK ADVICE ───────────────────────────────────────────
+async function getLookAdvice() {
+  const occ = document.querySelector('input[name="occ"]:checked').value;
+  const adv = document.getElementById('look-adv');
+  const txt = document.getElementById('look-adv-text');
+  adv.style.display = 'block';
+  txt.innerHTML = '<div class="skel" style="height:11px;width:90%;margin-bottom:5px"></div><div class="skel" style="height:11px;width:76%"></div>';
+  const occMap = {casual:'casual/everyday',work:'work/professional',party:'party/night out',sport:'sport/active'};
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:'You are a Brazilian fashion stylist. Give concise practical advice (3 sentences) in Brazilian Portuguese.',
+        messages:[{role:'user',content:`Current outfit: white basic top + blue jeans + black shoes. Occasion: ${occMap[occ]}. Analyze and give improvement tips.`}]
+      })
+    });
+    const data = await res.json();
+    txt.innerHTML = data.content[0].text;
+  } catch(e) {
+    const m = {casual:'Look casual ótimo! Adicione um tênis chunky e uma bolsa bucket. Um colar delicado dá personalidade.',work:'Para trabalho, troque o tênis por uma mule e adicione um blazer estruturado.',party:'Para uma saída, aposte em salto e uma bolsa clutch. Joias chamativas transformam o look.',sport:'Para esporte, prefira legging, top técnico e tênis adequado.'};
+    txt.innerHTML = m[occ];
+  }
+}
+
+// ── SHOPPING ─────────────────────────────────────────────
+async function searchShop() {
+  const q = document.getElementById('shop-input').value.trim();
+  if (!q) { toast('Type something to search'); return; }
+
+  const grid = document.getElementById('shop-grid');
+  grid.innerHTML = Array(8).fill(`
+    <div class="product-card">
+      <div class="product-photo"><div class="skel" style="position:absolute;inset:0;border-radius:0"></div></div>
+      <div class="product-body">
+        <div class="skel" style="height:12px;width:70%;margin-bottom:6px"></div>
+        <div class="skel" style="height:10px;width:45%"></div>
+      </div>
+    </div>`).join('');
+
+  const ql = q.toLowerCase();
+  let products = [];
+  if (ql.match(/blus|camis|top|camiset|regat/)) products = SHOP_DB.tops;
+  else if (ql.match(/calça|jeans|saia|legging|bermuda/)) products = SHOP_DB.bottoms;
+  else if (ql.match(/vestido|macac/)) products = SHOP_DB.dresses;
+  else if (ql.match(/sapato|tênis|bota|scarpin|calçado|shoe/)) products = SHOP_DB.shoes;
+  else if (ql.match(/bolsa|cinto|óculos|colar|acessório|bag/)) products = SHOP_DB.accessories;
+  else products = [...SHOP_DB.tops.slice(0,2),...SHOP_DB.bottoms.slice(0,2),...SHOP_DB.shoes.slice(0,2),...SHOP_DB.accessories.slice(0,2)];
+
+  // AI banner
+  let aiMsg = '';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:'You are a fashion stylist. Give a 1-2 sentence tip about the searched item and how it complements a basic wardrobe. Respond in Brazilian Portuguese.',
+        messages:[{role:'user',content:`User is searching for: "${q}"`}]
+      })
+    });
+    const data = await res.json();
+    aiMsg = data.content[0].text;
+  } catch(e) {
+    aiMsg = `Ótima escolha! ${q} é uma peça versátil que complementa bem múltiplos looks no guarda-roupa.`;
+  }
+
+  const banner = document.getElementById('ai-banner');
+  document.getElementById('ai-banner-text').innerHTML = `<strong>Dica de estilo:</strong> ${aiMsg}`;
+  banner.style.display = 'flex';
+
+  setTimeout(() => {
+    grid.innerHTML = products.map(p => `
+      <div class="product-card">
+        <div class="product-photo">
+          <img src="${p.img}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
+          <div class="store-pill">${p.store}</div>
+          ${p.match ? `<div class="ai-pill"><i class="ti ti-sparkles" style="font-size:11px"></i> Match</div>` : ''}
+        </div>
+        <div class="product-body">
+          <div class="product-name">${p.name}</div>
+          <div class="product-brand">${p.brand}</div>
+          <div class="product-row">
+            <div>
+              <span class="product-price">R$ ${p.price.toFixed(2).replace('.',',')}</span>
+              ${p.orig ? `<span class="product-old">R$ ${p.orig.toFixed(2).replace('.',',')}</span>` : ''}
+            </div>
+            <button class="btn-save" onclick="toast('Salvo nos favoritos!')"><i class="ti ti-heart" style="font-size:13px"></i> Save</button>
+          </div>
+        </div>
+      </div>`).join('');
+  }, 700);
+}
+
+function setFilter(btn, cat) {
+  document.querySelectorAll('.fchip').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+// ── MISC ─────────────────────────────────────────────────
+function goTo(page, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  el.classList.add('active');
+  if (page === 'dashboard') renderDash();
+  if (page === 'looks') renderPicker(pickerCat);
+}
+
+function renderDash() {
+  document.getElementById('stat-total').textContent = ITEMS.length;
+  document.getElementById('stat-looks').textContent = savedLooks.length;
+  const recent = ITEMS.slice(0,4);
+  document.getElementById('dash-recent').innerHTML = recent.map(it => `
+    <div class="cloth-card" style="cursor:default">
+      <div class="cloth-photo">
+        <img src="${it.img}" alt="${it.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+        <div class="fallback" style="display:none">${it.emoji}</div>
+      </div>
+      <div class="cloth-body">
+        <div class="cloth-name">${it.name}</div>
+        <div class="cloth-meta">
+          <span class="cloth-cat">${catLabel(it.cat)}</span>
+          <span class="cloth-brand-tag">${it.brand}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openModal() {
+  showStep(1);
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('file-inp').value = '';
+}
+function showStep(n) {
+  [1,2,3].forEach(i => document.getElementById('modal-step'+i).style.display = i===n ? 'block' : 'none');
+}
+
+let _pendingItem = null;
+
+async function handleFile(e) {
+  const file = e.target.files ? e.target.files[0] : null;
+  if (!file) return;
+
+  // Show the photo preview immediately
+  const objectUrl = URL.createObjectURL(file);
+  document.getElementById('preview-img').src = objectUrl;
+
+  // Go to step 2 (analyzing)
+  showStep(2);
+  const stepA = document.getElementById('step-a');
+  const stepB = document.getElementById('step-b');
+  const stepC = document.getElementById('step-c');
+  stepA.className = 'analysis-step';
+  stepA.innerHTML = '<i class="ti ti-loader-2 spin"></i> Identifying clothing piece...';
+  stepB.className = 'analysis-step pending';
+  stepB.innerHTML = '<i class="ti ti-circle-dashed"></i> Extracting color & style...';
+  stepC.className = 'analysis-step pending';
+  stepC.innerHTML = '<i class="ti ti-circle-dashed"></i> Categorizing item...';
+
+  // Read file as base64
+  const base64 = await new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+
+  // Determine media type
+  const mediaType = file.type || 'image/jpeg';
+
+  // Animate steps while waiting
+  const t1 = setTimeout(() => {
+    stepA.className = 'analysis-step done';
+    stepA.innerHTML = '<i class="ti ti-check"></i> Clothing piece identified';
+    stepB.className = 'analysis-step';
+    stepB.innerHTML = '<i class="ti ti-loader-2 spin"></i> Extracting color & style...';
+  }, 800);
+  const t2 = setTimeout(() => {
+    stepB.className = 'analysis-step done';
+    stepB.innerHTML = '<i class="ti ti-check"></i> Color & style extracted';
+    stepC.className = 'analysis-step';
+    stepC.innerHTML = '<i class="ti ti-loader-2 spin"></i> Categorizing item...';
+  }, 1600);
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `You are a fashion AI. Analyze the image and identify the main clothing piece visible (if the person is wearing it, focus on the garment, not the person).
+Respond ONLY with a valid JSON object — no markdown, no explanation — with these exact fields:
+{
+  "name": "descriptive name of the piece in Portuguese (e.g. Vestido Floral Midi)",
+  "category": one of: "tops" | "bottoms" | "dresses" | "outerwear" | "shoes" | "accessories",
+  "brand": "brand name if visible, otherwise null",
+  "color": "main color(s) in Portuguese",
+  "style": "brief style description in Portuguese, 1 sentence",
+  "emoji": "single most fitting emoji"
+}`,
+        messages: [{
+          role: 'user',
+          content: [{
+            type: 'image',
+            source: { type: 'base64', media_type: mediaType, data: base64 }
+          }, {
+            type: 'text',
+            text: 'Identify the main clothing piece in this photo and return the JSON.'
+          }]
+        }]
+      })
+    });
+
+    clearTimeout(t1); clearTimeout(t2);
+    const data = await res.json();
+    const raw = data.content.find(b => b.type === 'text')?.text || '{}';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    // Fill step 3 fields
+    stepB.className = 'analysis-step done';
+    stepB.innerHTML = '<i class="ti ti-check"></i> Color & style extracted';
+    stepC.className = 'analysis-step done';
+    stepC.innerHTML = '<i class="ti ti-check"></i> Item categorized';
+
+    document.getElementById('confirm-name').value  = parsed.name  || 'Peça sem nome';
+    document.getElementById('confirm-cat').value   = parsed.category || 'dresses';
+    document.getElementById('confirm-brand').value = parsed.brand || '';
+    document.getElementById('confirm-desc').textContent =
+      `${parsed.color ? 'Cor: ' + parsed.color + '. ' : ''}${parsed.style || ''}`;
+
+    _pendingItem = {
+      id: Date.now(),
+      name:  parsed.name  || 'Peça sem nome',
+      brand: (parsed.brand || 'Unknown').toUpperCase(),
+      cat:   parsed.category || 'dresses',
+      emoji: parsed.emoji || '👗',
+      img:   objectUrl,
+    };
+
+    setTimeout(() => showStep(3), 500);
+
+  } catch (err) {
+    clearTimeout(t1); clearTimeout(t2);
+    // Fallback: still go to step 3 with generic info
+    stepC.className = 'analysis-step done';
+    stepC.innerHTML = '<i class="ti ti-check"></i> Item categorized';
+
+    document.getElementById('confirm-name').value  = 'Peça identificada';
+    document.getElementById('confirm-cat').value   = 'dresses';
+    document.getElementById('confirm-brand').value = '';
+    document.getElementById('confirm-desc').textContent = 'A IA não conseguiu identificar os detalhes. Preencha manualmente.';
+
+    _pendingItem = {
+      id: Date.now(),
+      name: 'Peça identificada',
+      brand: 'UNKNOWN',
+      cat: 'dresses',
+      emoji: '👗',
+      img: objectUrl,
+    };
+
+    setTimeout(() => showStep(3), 500);
+  }
+}
+
+function confirmAdd() {
+  if (!_pendingItem) return;
+  _pendingItem.name  = document.getElementById('confirm-name').value  || _pendingItem.name;
+  _pendingItem.cat   = document.getElementById('confirm-cat').value   || _pendingItem.cat;
+  const brand = document.getElementById('confirm-brand').value.trim();
+  _pendingItem.brand = brand ? brand.toUpperCase() : 'UNKNOWN';
+
+  ITEMS.unshift({..._pendingItem});
+  _pendingItem = null;
+  closeModal();
+  filterWardrobe();
+  toast('Item added to wardrobe!');
+}
+
+function addDemo() {
+  const demos = [
+    {name:'Camisa de Linho Azul',brand:'ZARA',cat:'tops',emoji:'👕',img:'https://images.unsplash.com/photo-1603251579431-8041402bdeda?w=400&q=80'},
+    {name:'Moletom Vintage',brand:'H&M',cat:'tops',emoji:'👕',img:'https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=400&q=80'},
+    {name:'Jaqueta de Couro',brand:'AMARO',cat:'outerwear',emoji:'🧥',img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&q=80'},
+  ];
+  const d = demos[ITEMS.length % demos.length];
+  ITEMS.unshift({...d, id: Date.now()});
+  closeModal();
+  filterWardrobe();
+  toast('Item added to wardrobe!');
+}
+
+function saveLook() {
+  const pieces = Object.values(currentLook).filter(Boolean);
+  if (!pieces.length) { toast('Add at least one piece to your look first'); return; }
+  const names = ['Casual Look','Work Look','Night Out','Minimalist','Colorful'];
+  savedLooks.unshift({
+    name: names[savedLooks.length % names.length],
+    pieces: pieces.slice(),
+    date: new Date().toLocaleDateString('pt-BR')
+  });
+  renderSaved();
+  toast('Look saved!');
+}
+
+function renderSaved() {
+  const el = document.getElementById('saved-looks');
+  if (!savedLooks.length) { el.innerHTML = '<p style="font-size:13px;color:var(--text-light);grid-column:1/-1">No looks saved yet.</p>'; return; }
+  el.innerHTML = savedLooks.map((l,idx) => {
+    const thumbs = l.pieces.slice(0,4).map(p =>
+      p.img
+        ? `<img src="${p.img}" alt="${p.name}" title="${p.name}">`
+        : `<span style="font-size:28px">${p.emoji}</span>`
+    ).join('');
+    return `
+    <div class="saved-card" onclick="loadSavedLook(${idx})">
+      <div class="saved-thumb">${thumbs}</div>
+      <div class="saved-info"><p>${l.name}</p><small>${l.date} · ${l.pieces.length} pieces</small></div>
+    </div>`;
+  }).join('');
+}
+
+function loadSavedLook(idx) {
+  clearLook();
+  savedLooks[idx].pieces.forEach(item => {
+    currentLook[item.cat] = item;
+    fillSlot(item.cat, item);
+    updateMannequin(item.cat, item);
+  });
+  renderPicker(pickerCat);
+  toast('Look loaded!');
+}
+
+// ── LOOK BUILDER STATE ───────────────────────────────────
+const currentLook = { tops:null, bottoms:null, dresses:null, outerwear:null, shoes:null, accessories:null };
+
+// ── TRY-ON REAL (FASHN) ───────────────────────────────────
+// IMPORTANTE: troque pela URL da sua função na Vercel depois do deploy.
+// Ex: 'https://meu-closet.vercel.app/api/tryon'
+const TRYON_ENDPOINT = '/api/tryon';
+
+let myPhotoBase64 = null;
+
+function handleMyPhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    myPhotoBase64 = reader.result; // data URL completo (base64)
+    document.getElementById('tryon-photo-status').textContent = '✓ Foto adicionada';
+    document.getElementById('my-photo-btn-label').textContent = 'Trocar minha foto';
+    document.getElementById('btn-tryon').disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function generateTryOn() {
+  if (!myPhotoBase64) { toast('Adicione sua foto primeiro'); return; }
+
+  // Descobre qual peça usar para o try-on (prioridade: vestido > top > bottom)
+  const piece = currentLook.dresses || currentLook.tops || currentLook.bottoms || currentLook.outerwear;
+  if (!piece) { toast('Adicione uma peça ao look primeiro'); return; }
+  if (!piece.img) { toast('Essa peça não tem foto para o try-on'); return; }
+
+  const catMap = { dresses:'one-pieces', tops:'tops', bottoms:'bottoms', outerwear:'tops' };
+  const category = catMap[piece.cat] || 'auto';
+
+  const btn = document.getElementById('btn-tryon');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite;display:inline-block"></i> Gerando... (até 30s)';
+
+  try {
+    const resp = await fetch(TRYON_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model_image: myPhotoBase64,
+        garment_image: piece.img,
+        category,
+      }),
+    });
+    const data = await resp.json();
+
+    if (data.image) {
+      document.getElementById('tryon-img').src = data.image;
+      document.getElementById('tryon-result').style.display = 'block';
+      toast('Try-on gerado!');
+    } else {
+      toast('Erro: ' + (data.error || 'tente novamente'));
+      console.error(data);
+    }
+  } catch (err) {
+    toast('Erro de conexão com o servidor');
+    console.error(err);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="ti ti-sparkles"></i> Gerar try-on realista';
+}
+let pickerCat = 'all';
+
+// mannequin color map per category
+const mannequinColors = {
+  tops:       ['m-top','m-tsl','m-tsr'],
+  bottoms:    ['m-bottom','m-belt'],
+  dresses:    ['m-top','m-tsl','m-tsr','m-bottom','m-belt'],
+  outerwear:  ['m-top','m-tsl','m-tsr'],
+  shoes:      ['m-sl','m-sr'],
+  accessories:[]
+};
+
+function renderPicker(cat) {
+  const grid = document.getElementById('picker-grid');
+  const items = cat === 'all' ? ITEMS : ITEMS.filter(i => i.cat === cat);
+  if (!items.length) {
+    grid.innerHTML = '<p style="font-size:12px;color:var(--text-light);grid-column:1/-1;padding:8px 0">No pieces in this category yet.</p>';
+    return;
+  }
+  grid.innerHTML = items.map(item => {
+    const inLook = Object.values(currentLook).some(v => v && v.id === item.id);
+    return `
+    <div class="picker-card${inLook?' in-look':''}" id="pcard-${item.id}" onclick="applyPiece(${item.id})">
+      <div class="picker-photo">
+        ${item.img
+          ? `<img src="${item.img}" alt="${item.name}" loading="lazy" onerror="this.style.display='none';this.nextSibling.style.display='block'"><span style="display:none;font-size:36px">${item.emoji}</span>`
+          : `<span>${item.emoji}</span>`}
+        <div class="picker-tick"><i class="ti ti-check"></i></div>
+      </div>
+      <div class="picker-label">${item.name}</div>
+    </div>`;
+  }).join('');
+}
+
+function setPicCat(cat, btn) {
+  pickerCat = cat;
+  document.querySelectorAll('.pcat').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderPicker(cat);
+}
+
+function openPicCat(cat) {
+  // switch the picker to that category and scroll it into view
+  pickerCat = cat;
+  document.querySelectorAll('.pcat').forEach(b => {
+    b.classList.toggle('on', b.textContent.toLowerCase().includes(cat.slice(0,3)));
+  });
+  renderPicker(cat);
+  document.querySelector('.piece-picker').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function applyPiece(id) {
+  const item = ITEMS.find(i => i.id === id);
+  if (!item) return;
+
+  const cat = item.cat;
+  // if dress, clear tops+bottoms since dress replaces both
+  if (cat === 'dresses') { currentLook.tops = null; currentLook.bottoms = null; }
+  // if tops/bottoms applied, clear dress
+  if (cat === 'tops' || cat === 'bottoms') { currentLook.dresses = null; }
+
+  // toggle off if same item clicked again
+  if (currentLook[cat] && currentLook[cat].id === id) {
+    removeSlot(cat);
+    return;
+  }
+
+  currentLook[cat] = item;
+  fillSlot(cat, item);
+  updateMannequin(cat, item);
+  renderPicker(pickerCat);
+  toast(`${item.name} added to look`);
+}
+
+function fillSlot(cat, item) {
+  const slot = document.getElementById('slot-' + cat);
+  if (!slot) return;
+  slot.classList.add('filled');
+  slot.querySelector('.slot-name').textContent = item.name;
+  const img = slot.querySelector('.slot-img');
+  if (item.img) { img.src = item.img; img.style.display = 'block'; }
+  else img.style.display = 'none';
+  // also clear slots visually if dress was applied
+  if (cat === 'dresses') {
+    clearSlotVisual('tops');
+    clearSlotVisual('bottoms');
+  }
+  if (cat === 'tops' || cat === 'bottoms') clearSlotVisual('dresses');
+}
+
+function clearSlotVisual(cat) {
+  const slot = document.getElementById('slot-' + cat);
+  if (!slot) return;
+  slot.classList.remove('filled');
+  slot.querySelector('.slot-name').textContent = 'Click a piece to add';
+  slot.querySelector('.slot-img').style.display = 'none';
+}
+
+function updateMannequin(cat, item) {
+  const col = itemColor(item);
+  const dark = shadeColor(col, -20);
+  const light = shadeColor(col, 15);
+
+  if (cat === 'tops') {
+    show('cloth-top'); hide('cloth-dress');
+    set('m-top', 'fill', col);
+    set('m-top-neck', 'stroke', dark);
+  }
+  if (cat === 'bottoms') {
+    show('cloth-bottom'); hide('cloth-dress');
+    set('m-bottom', 'fill', col);
+    set('m-belt', 'fill', dark);
+  }
+  if (cat === 'dresses') {
+    show('cloth-dress'); hide('cloth-top'); hide('cloth-bottom');
+    // color all dress parts
+    const dressParts = document.getElementById('cloth-dress')?.querySelectorAll('path[id], rect[id]');
+    dressParts?.forEach(p => {
+      if (p.id === 'm-bottom' || p.id === 'm-belt') return;
+      p.setAttribute('fill', p.id === 'm-dress-bodice' ? dark : col);
+    });
+  }
+  if (cat === 'outerwear') {
+    show('cloth-outer');
+    set('m-outer', 'fill', col);
+    // lapels slightly darker
+    const outer = document.getElementById('cloth-outer');
+    outer?.querySelectorAll('path:not([id])').forEach((p,i) => {
+      if(i<2) p.setAttribute('fill', dark);
+    });
+  }
+  if (cat === 'shoes') {
+    set('m-sl', 'fill', col);
+    set('m-sr', 'fill', col);
+    set('m-strap-l', 'stroke', dark);
+    set('m-strap-r', 'stroke', dark);
+  }
+}
+
+function itemColor(item) {
+  const map = {
+    '👕':'#E8E4DE','👗':'#D4A0B4','👖':'#4B6B9A','🧥':'#C4A96A',
+    '👟':'#E8E4DE','👠':'#D4A98A','👢':'#4A2C1A','👡':'#C4A96A',
+    '👜':'#6B4226','🩱':'#2A2A3A','🩳':'#D4CFC7','🧤':'#8B5E3C',
+    '🟥':'#9B4B4B','🟦':'#4B6B9A','⬛':'#2A2A2A','⬜':'#F0EDE8'
+  };
+  return map[item.emoji] || '#C0BBB0';
+}
+
+function show(id) { const el = document.getElementById(id); if(el) el.style.display=''; }
+function hide(id) { const el = document.getElementById(id); if(el) el.style.display='none'; }
+function set(id, attr, val) { document.getElementById(id)?.setAttribute(attr, val); }
+
+function clearLook() {
+  Object.keys(currentLook).forEach(k => { currentLook[k] = null; clearSlotVisual(k); });
+  hide('cloth-top'); hide('cloth-bottom'); hide('cloth-dress'); hide('cloth-outer');
+  // reset shoes to bare feet
+  set('m-sl', 'fill', 'url(#skinDark)');
+  set('m-sr', 'fill', 'url(#skinDark)');
+  renderPicker(pickerCat);
+  toast('Look cleared');
+}
+
+function applyTrend(t) {
+  const c = {coastal:['#B8C4D0','#E8E0D4'],quiet:['#E8E4DE','#2C2C2A'],y2k:['#C8A8E8','#8B4BC8']};
+  // show dress layer with trend colors
+  show('cloth-dress'); hide('cloth-top'); hide('cloth-bottom');
+  const dressParts = document.getElementById('cloth-dress')?.querySelectorAll('path[id]');
+  dressParts?.forEach(p => {
+    if (p.id === 'm-bottom' || p.id === 'm-belt') return;
+    p.setAttribute('fill', p.id === 'm-dress-bodice' ? shadeColor(c[t][0],-15) : c[t][0]);
+  });
+  toast('Trend applied!');
+}
+
+function removeSlot(cat) {
+  currentLook[cat] = null;
+  clearSlotVisual(cat);
+  if (cat === 'tops')      hide('cloth-top');
+  if (cat === 'bottoms')   hide('cloth-bottom');
+  if (cat === 'dresses')   hide('cloth-dress');
+  if (cat === 'outerwear') hide('cloth-outer');
+  if (cat === 'shoes') {
+    set('m-sl', 'fill', 'url(#skinDark)');
+    set('m-sr', 'fill', 'url(#skinDark)');
+  }
+  renderPicker(pickerCat);
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ── INIT ──────────────────────────────────────────────────
+renderClothes(ITEMS);
+renderSaved();
+</script>
+</body>
+</html>
